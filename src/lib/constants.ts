@@ -85,4 +85,4 @@ export const PLAN_LIMITS = {
   pro: { maxLinks: Infinity, analytics: true, customColors: true, emailCapture: true },
 } as const;
 
-export const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/3cIeVc0HjbZ3evnczTeAg07";
+export const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/3cIeVcblX6EJ1IB8jDeAg08";

@@ -16,7 +16,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "OneLink — Your Internet, One Link",
   description:
-    "Create your personal landing page in 60 seconds. All your links, socials, and content — one beautiful page. Free forever, $3 to unlock everything.",
+    "Create your personal landing page in 60 seconds. All your links, socials, and content — one beautiful page. Free forever, $10 to unlock everything.",
   keywords: [
     "free linktree alternative",
     "bio link page",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "OneLink — Your Internet, One Link",
     description:
-      "Create your personal landing page in 60 seconds. Free forever, $3 to unlock everything.",
+      "Create your personal landing page in 60 seconds. Free forever, $10 to unlock everything.",
   },
   metadataBase: new URL("https://onelink.wagnerway.co.za"),
   icons: {
