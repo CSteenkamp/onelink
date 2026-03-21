@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  displayName   String
+  bio           String?
+  avatarUrl     String?
+  headerImage   String?
+  theme         String         @default("midnight")
+  customColor   String?
+  loginCode     String         @unique
+  adminPassword String
+  email         String?
+  plan          String         @default("free")
+  views         Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  links         Link[]
+  socialLinks   SocialLink[]
+  subscription  Subscription?
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  profileId String
+  title     String
+  url       String
+  icon      String?
+  clicks    Int      @default(0)
+  enabled   Boolean  @default(true)
+  order     Int
+  createdAt DateTime @default(now())
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model SocialLink {
+  id        String  @id @default(cuid())
+  profileId String
+  platform  String
+  url       String
+  order     Int
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Subscription {
+  id               String   @id @default(cuid())
+  profileId        String   @unique
+  stripeCustomerId String?
+  plan             String   @default("free")
+  status           String   @default("active")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  profile          Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
