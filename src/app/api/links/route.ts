@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseSessionToken } from "@/lib/auth";
+import { getProfileIdFromRequest } from "@/lib/session";
+import { isValidUrl, sanitizeString } from "@/lib/auth";
 import { PLAN_LIMITS } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const links = await prisma.link.findMany({
@@ -22,9 +21,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const profile = await prisma.profile.findUnique({ where: { id: profileId } });
@@ -38,9 +35,18 @@ export async function POST(req: NextRequest) {
 
     const { title, url, icon } = await req.json();
     if (!title || !url) return NextResponse.json({ error: "Title and URL required" }, { status: 400 });
+    if (!isValidUrl(url)) {
+      return NextResponse.json({ error: "URL must start with http:// or https://" }, { status: 400 });
+    }
 
     const link = await prisma.link.create({
-      data: { profileId, title, url, icon: icon || null, order: linkCount },
+      data: {
+        profileId,
+        title: sanitizeString(title, 200),
+        url,
+        icon: icon ? sanitizeString(icon, 10) : null,
+        order: linkCount,
+      },
     });
     return NextResponse.json({ link });
   } catch {

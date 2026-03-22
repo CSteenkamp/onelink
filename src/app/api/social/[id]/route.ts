@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseSessionToken } from "@/lib/auth";
+import { getProfileIdFromRequest } from "@/lib/session";
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const socialLink = await prisma.socialLink.findUnique({ where: { id: params.id } });

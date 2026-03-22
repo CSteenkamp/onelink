@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseSessionToken } from "@/lib/auth";
+import { getProfileIdFromRequest } from "@/lib/session";
+import { isValidUrl, sanitizeString } from "@/lib/auth";
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const link = await prisma.link.findUnique({ where: { id: params.id } });
@@ -15,13 +14,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const body = await req.json();
+    if (body.url !== undefined && !isValidUrl(body.url)) {
+      return NextResponse.json({ error: "URL must start with http:// or https://" }, { status: 400 });
+    }
+
     const updated = await prisma.link.update({
       where: { id: params.id },
       data: {
-        ...(body.title !== undefined && { title: body.title }),
+        ...(body.title !== undefined && { title: sanitizeString(body.title, 200) }),
         ...(body.url !== undefined && { url: body.url }),
-        ...(body.icon !== undefined && { icon: body.icon }),
-        ...(body.enabled !== undefined && { enabled: body.enabled }),
+        ...(body.icon !== undefined && { icon: body.icon ? sanitizeString(body.icon, 10) : null }),
+        ...(body.enabled !== undefined && { enabled: Boolean(body.enabled) }),
       },
     });
     return NextResponse.json({ link: updated });
@@ -32,9 +35,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const link = await prisma.link.findUnique({ where: { id: params.id } });

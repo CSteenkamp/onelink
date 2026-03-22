@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword, createSessionToken, parseSessionToken } from "@/lib/auth";
 
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
+
 // POST: Login with code + password
 export async function POST(req: NextRequest) {
   try {
@@ -11,17 +13,26 @@ export async function POST(req: NextRequest) {
     }
 
     const profile = await prisma.profile.findUnique({ where: { loginCode } });
-    if (!profile) {
-      return NextResponse.json({ error: "Invalid login code" }, { status: 401 });
-    }
 
-    const valid = await verifyPassword(password, profile.adminPassword);
-    if (!valid) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+    // Constant-time: always verify even if profile not found (prevents timing attack)
+    const valid = profile
+      ? await verifyPassword(password, profile.adminPassword)
+      : await verifyPassword(password, "$2a$12$invalidhashpaddingtopreventshortexit");
+
+    if (!profile || !valid) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
     const sessionToken = createSessionToken(profile.id);
-    return NextResponse.json({ sessionToken, slug: profile.slug });
+    const response = NextResponse.json({ sessionToken, slug: profile.slug });
+    response.cookies.set("onelink_session", sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: COOKIE_MAX_AGE,
+    });
+    return response;
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -30,7 +41,9 @@ export async function POST(req: NextRequest) {
 // PUT: Verify session and return profile data (used by admin dashboard)
 export async function PUT(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    const token =
+      req.headers.get("authorization")?.replace("Bearer ", "") ||
+      req.cookies.get("onelink_session")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const profileId = parseSessionToken(token);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

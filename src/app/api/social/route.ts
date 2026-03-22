@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseSessionToken } from "@/lib/auth";
+import { getProfileIdFromRequest } from "@/lib/session";
+import { isValidUrl, sanitizeString } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const socialLinks = await prisma.socialLink.findMany({
@@ -21,17 +20,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { platform, url } = await req.json();
     if (!platform || !url) return NextResponse.json({ error: "Platform and URL required" }, { status: 400 });
+    if (!isValidUrl(url)) {
+      return NextResponse.json({ error: "URL must start with http:// or https://" }, { status: 400 });
+    }
 
     const count = await prisma.socialLink.count({ where: { profileId } });
     const socialLink = await prisma.socialLink.create({
-      data: { profileId, platform, url, order: count },
+      data: { profileId, platform: sanitizeString(platform, 50), url, order: count },
     });
     return NextResponse.json({ socialLink });
   } catch {

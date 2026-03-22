@@ -34,6 +34,14 @@ interface SocialLinkData {
   order: number;
 }
 
+// Helper for authenticated API calls — cookies are sent automatically
+function authFetch(url: string, options: RequestInit = {}) {
+  return fetch(url, {
+    ...options,
+    credentials: "include",
+  });
+}
+
 export default function AdminPageWrapper() {
   return (
     <Suspense fallback={<main className="min-h-screen bg-[#0F172A] flex items-center justify-center"><div className="text-gray-400">Loading...</div></main>}>
@@ -70,21 +78,11 @@ function AdminPage() {
   const [newSocialPlatform, setNewSocialPlatform] = useState("twitter");
   const [newSocialUrl, setNewSocialUrl] = useState("");
 
-  const getSession = useCallback(() => {
-    const match = document.cookie.match(/onelink_session=([^;]+)/);
-    return match ? match[1] : null;
-  }, []);
-
   const fetchProfile = useCallback(async () => {
-    const token = getSession();
-    if (!token) {
-      router.push("/login");
-      return;
-    }
     try {
-      const res = await fetch("/api/admin/auth", {
+      const res = await authFetch("/api/admin/auth", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
       });
       if (!res.ok) {
         router.push("/login");
@@ -102,21 +100,20 @@ function AdminPage() {
       router.push("/login");
     }
     setLoading(false);
-  }, [getSession, router]);
+  }, [router]);
 
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
   async function saveProfile() {
-    const token = getSession();
-    if (!profile || !token) return;
+    if (!profile) return;
     setSaving(true);
     setSaveMsg("");
     try {
-      const res = await fetch(`/api/profiles/${profile.slug}`, {
+      const res = await authFetch(`/api/profiles/${profile.slug}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ displayName, bio, avatarUrl, theme }),
       });
       if (res.ok) {
@@ -134,11 +131,10 @@ function AdminPage() {
   }
 
   async function addLink() {
-    const token = getSession();
-    if (!newLinkTitle || !newLinkUrl || !token) return;
-    const res = await fetch("/api/links", {
+    if (!newLinkTitle || !newLinkUrl) return;
+    const res = await authFetch("/api/links", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: newLinkTitle, url: newLinkUrl, icon: newLinkIcon || null }),
     });
     if (res.ok) {
@@ -151,21 +147,14 @@ function AdminPage() {
   }
 
   async function deleteLink(id: string) {
-    const token = getSession();
-    if (!token) return;
-    await fetch(`/api/links/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await authFetch(`/api/links/${id}`, { method: "DELETE" });
     setLinks(links.filter((l) => l.id !== id));
   }
 
   async function toggleLink(id: string, enabled: boolean) {
-    const token = getSession();
-    if (!token) return;
-    await fetch(`/api/links/${id}`, {
+    await authFetch(`/api/links/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enabled: !enabled }),
     });
     setLinks(links.map((l) => (l.id === id ? { ...l, enabled: !enabled } : l)));
@@ -179,21 +168,18 @@ function AdminPage() {
     const newLinks = [...links];
     [newLinks[idx], newLinks[newIdx]] = [newLinks[newIdx], newLinks[idx]];
     setLinks(newLinks);
-    const token = getSession();
-    if (!token) return;
-    await fetch("/api/links/reorder", {
+    await authFetch("/api/links/reorder", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ linkIds: newLinks.map((l) => l.id) }),
     });
   }
 
   async function addSocial() {
-    const token = getSession();
-    if (!newSocialUrl || !token) return;
-    const res = await fetch("/api/social", {
+    if (!newSocialUrl) return;
+    const res = await authFetch("/api/social", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ platform: newSocialPlatform, url: newSocialUrl }),
     });
     if (res.ok) {
@@ -204,12 +190,7 @@ function AdminPage() {
   }
 
   async function deleteSocial(id: string) {
-    const token = getSession();
-    if (!token) return;
-    await fetch(`/api/social/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await authFetch(`/api/social/${id}`, { method: "DELETE" });
     setSocialLinks(socialLinks.filter((s) => s.id !== id));
   }
 

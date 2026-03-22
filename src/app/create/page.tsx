@@ -68,8 +68,7 @@ export default function CreateProfile() {
         setSubmitting(false);
         return;
       }
-      // Store session
-      document.cookie = `onelink_session=${data.sessionToken}; path=/; max-age=${60 * 60 * 24 * 365}`;
+      // Cookie is set server-side with HttpOnly flag
       router.push(`/admin?loginCode=${data.loginCode}`);
     } catch {
       setError("Network error. Please try again.");
