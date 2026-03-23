@@ -64,6 +64,7 @@ export async function PUT(req: NextRequest) {
         headerImage: profile.headerImage,
         theme: profile.theme,
         plan: profile.plan,
+        customColor: profile.customColor,
         views: profile.views,
         email: profile.email,
         subscriptionStatus: profile.subscription?.status || null,

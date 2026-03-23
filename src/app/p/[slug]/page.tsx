@@ -63,6 +63,7 @@ export default async function ProfilePage({ params }: Props) {
           headerImage: profile.headerImage,
           theme: themeId,
           plan: profile.plan,
+          customColor: profile.customColor,
         }}
         links={profile.links.map((l) => ({
           id: l.id,

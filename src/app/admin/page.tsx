@@ -15,6 +15,7 @@ interface ProfileData {
   headerImage: string | null;
   theme: string;
   plan: string;
+  customColor: string | null;
   views: number;
   email: string;
   subscriptionStatus: string | null;
@@ -24,6 +25,7 @@ interface SocialLinkData {
   id: string;
   platform: string;
   url: string;
+  clicks: number;
   order: number;
 }
 
@@ -53,6 +55,7 @@ function AdminPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [headerImage, setHeaderImage] = useState("");
   const [theme, setTheme] = useState<ThemeId>("midnight");
+  const [customColor, setCustomColor] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
@@ -84,6 +87,7 @@ function AdminPage() {
       setBio(data.profile.bio || "");
       setAvatarUrl(data.profile.avatarUrl || "");
       setHeaderImage(data.profile.headerImage || "");
+      setCustomColor(data.profile.customColor || "");
       setTheme(data.profile.theme as ThemeId);
       setSocialLinks(data.socialLinks);
     } catch {
@@ -104,7 +108,7 @@ function AdminPage() {
       const res = await authFetch(`/api/profiles/${profile.slug}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, bio, avatarUrl, headerImage, theme }),
+        body: JSON.stringify({ displayName, bio, avatarUrl, headerImage, theme, customColor: customColor || null }),
       });
       if (res.ok) {
         setSaveMsg("Saved!");
@@ -233,29 +237,70 @@ function AdminPage() {
               imageType="avatar"
               label="Avatar"
             />
-            <ImageUpload
-              currentImageUrl={headerImage}
-              onImageChange={setHeaderImage}
-              imageType="header"
-              label="Header Image"
-            />
+            {isPro ? (
+              <ImageUpload
+                currentImageUrl={headerImage}
+                onImageChange={setHeaderImage}
+                imageType="header"
+                label="Header Image"
+              />
+            ) : (
+              <div className="opacity-60">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Header Image <span className="text-amber-400 text-xs font-normal">PRO</span></label>
+                <p className="text-gray-500 text-sm">Upgrade to Pro to add a header image to your profile.</p>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Theme</label>
-              <div className="grid grid-cols-4 gap-2">
-                {(Object.entries(THEMES) as [ThemeId, (typeof THEMES)[ThemeId]][]).map(([id, t]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setTheme(id)}
-                    className={`rounded-lg p-3 text-xs font-medium text-center transition-all ${t.bg} ${
-                      theme === id ? "ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0F172A]" : "opacity-70 hover:opacity-100"
-                    }`}
-                  >
-                    <span className={t.text}>{t.name}</span>
-                  </button>
-                ))}
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                {(Object.entries(THEMES) as [ThemeId, (typeof THEMES)[ThemeId]][]).map(([id, t]) => {
+                  const locked = t.pro && !isPro;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => !locked && setTheme(id)}
+                      disabled={locked}
+                      className={`rounded-lg p-3 text-xs font-medium text-center transition-all relative ${t.bg} ${
+                        theme === id ? "ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0F172A]" : locked ? "opacity-40 cursor-not-allowed" : "opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      <span className={t.text}>{t.name}</span>
+                      {locked && <span className="block text-[10px] text-amber-400 mt-0.5">PRO</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+            {isPro ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Custom Accent Color</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={customColor || "#a855f7"}
+                    onChange={(e) => setCustomColor(e.target.value)}
+                    className="w-10 h-10 rounded-lg border border-white/10 bg-transparent cursor-pointer"
+                  />
+                  <span className="text-gray-400 text-sm">{customColor || "Default"}</span>
+                  {customColor && (
+                    <button
+                      type="button"
+                      onClick={() => setCustomColor("")}
+                      className="text-xs text-gray-500 hover:text-white transition-colors"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <p className="text-gray-500 text-xs mt-1">Applies to social link hover colors on your profile.</p>
+              </div>
+            ) : (
+              <div className="opacity-60">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Custom Accent Color <span className="text-amber-400 text-xs font-normal">PRO</span></label>
+                <p className="text-gray-500 text-sm">Upgrade to Pro to customize your accent color.</p>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <button
                 onClick={saveProfile}
@@ -331,10 +376,32 @@ function AdminPage() {
         {/* Analytics Tab */}
         {activeTab === "analytics" && isPro && (
           <div className="space-y-6">
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 text-center">
-              <div className="text-3xl font-bold text-white">{profile.views}</div>
-              <div className="text-gray-400 text-sm mt-1">Total Views</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10 text-center">
+                <div className="text-3xl font-bold text-white">{profile.views}</div>
+                <div className="text-gray-400 text-sm mt-1">Page Views</div>
+              </div>
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10 text-center">
+                <div className="text-3xl font-bold text-white">{socialLinks.reduce((sum, s) => sum + s.clicks, 0)}</div>
+                <div className="text-gray-400 text-sm mt-1">Total Clicks</div>
+              </div>
             </div>
+            {socialLinks.length > 0 && (
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-white font-medium mb-4">Link Performance</h3>
+                {[...socialLinks].sort((a, b) => b.clicks - a.clicks).map((social) => {
+                  const platform = SOCIAL_PLATFORMS.find((p) => p.id === social.platform);
+                  return (
+                    <div key={social.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                      <span className="text-gray-300 text-sm">
+                        {platform?.icon} {platform?.name || social.platform}
+                      </span>
+                      <span className="text-purple-400 font-medium text-sm">{social.clicks} clicks</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

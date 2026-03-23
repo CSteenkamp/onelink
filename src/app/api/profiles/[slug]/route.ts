@@ -46,7 +46,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     }
 
     const body = await req.json();
-    const { displayName, bio, avatarUrl, headerImage, theme, email } = body;
+    const { displayName, bio, avatarUrl, headerImage, theme, email, customColor } = body;
 
     // Validate inputs
     if (displayName !== undefined && (displayName.trim().length < 1 || displayName.trim().length > 100)) {
@@ -64,6 +64,12 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     if (theme !== undefined && !(theme in THEMES)) {
       return NextResponse.json({ error: "Invalid theme" }, { status: 400 });
     }
+    if (theme !== undefined && THEMES[theme as keyof typeof THEMES]?.pro && profile.plan !== "pro") {
+      return NextResponse.json({ error: "This theme requires a Pro plan" }, { status: 403 });
+    }
+    if (headerImage && headerImage !== "" && profile.plan !== "pro") {
+      return NextResponse.json({ error: "Header images require a Pro plan" }, { status: 403 });
+    }
     if (email !== undefined && email !== "" && !isValidEmail(email)) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
     }
@@ -76,6 +82,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
         ...(avatarUrl !== undefined && { avatarUrl: avatarUrl || null }),
         ...(headerImage !== undefined && { headerImage: headerImage || null }),
         ...(theme !== undefined && { theme }),
+        ...(customColor !== undefined && { customColor: customColor || null }),
         ...(email !== undefined && { email: email || null }),
       },
     });

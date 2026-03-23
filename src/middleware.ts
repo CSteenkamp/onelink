@@ -39,6 +39,7 @@ const RATE_LIMITS: { pattern: RegExp; limit: number; windowMs: number }[] = [
   // Click/view tracking: 30 per minute per IP
   { pattern: /^\/api\/links\/[^/]+\/click$/, limit: 30, windowMs: 60 * 1000 },
   { pattern: /^\/api\/views\//, limit: 30, windowMs: 60 * 1000 },
+  { pattern: /^\/api\/social\/[^/]+\/click$/, limit: 30, windowMs: 60 * 1000 },
   // Password reset: 5 per hour
   { pattern: /^\/api\/auth\/forgot-password$/, limit: 5, windowMs: 60 * 60 * 1000 },
   { pattern: /^\/api\/auth\/reset-password$/, limit: 10, windowMs: 60 * 60 * 1000 },

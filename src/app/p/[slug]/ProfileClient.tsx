@@ -13,6 +13,7 @@ interface ProfileData {
   headerImage: string | null;
   theme: string;
   plan: string;
+  customColor: string | null;
 }
 
 interface LinkData {
@@ -61,6 +62,10 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
 
   function handleLinkClick(linkId: string) {
     fetch(`/api/links/${linkId}/click`, { method: "POST" }).catch(() => {});
+  }
+
+  function handleSocialClick(socialId: string) {
+    fetch(`/api/social/${socialId}/click`, { method: "POST" }).catch(() => {});
   }
 
   function getSocialPlatform(platformId: string): SocialPlatform | undefined {
@@ -131,10 +136,11 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => handleSocialClick(social.id)}
                   className="flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-200 hover:scale-[1.02]"
                   style={{ backgroundColor: defaultBg }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = platform.color;
+                    (e.currentTarget as HTMLElement).style.backgroundColor = profile.customColor || platform.color;
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.backgroundColor = defaultBg;
