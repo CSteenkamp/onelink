@@ -1,25 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyPassword, createSessionToken, parseSessionToken } from "@/lib/auth";
+import { verifyPassword, createSessionToken } from "@/lib/auth";
+import { getProfileIdFromRequest } from "@/lib/session";
 
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
 
-// POST: Login with slug + password (also supports legacy loginCode)
+// POST: Login with email + password
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { slug, loginCode, password } = body;
-
-    if ((!slug && !loginCode) || !password) {
+    const { email, password } = await req.json();
+    if (!email || !password) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
     }
 
-    let profile;
-    if (slug) {
-      profile = await prisma.profile.findUnique({ where: { slug: slug.trim().toLowerCase() } });
-    } else {
-      profile = await prisma.profile.findUnique({ where: { loginCode: loginCode.trim().toUpperCase() } });
-    }
+    const profile = await prisma.profile.findUnique({ where: { email: email.toLowerCase().trim() } });
 
     // Constant-time: always verify even if profile not found (prevents timing attack)
     const valid = profile
@@ -30,8 +24,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
     }
 
-    const sessionToken = createSessionToken(profile.id);
-    const response = NextResponse.json({ sessionToken, slug: profile.slug });
+    const sessionToken = createSessionToken(profile.id, profile.tokenVersion);
+    const response = NextResponse.json({ slug: profile.slug });
     response.cookies.set("onelink_session", sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -48,17 +42,12 @@ export async function POST(req: NextRequest) {
 // PUT: Verify session and return profile data (used by admin dashboard)
 export async function PUT(req: NextRequest) {
   try {
-    const token =
-      req.headers.get("authorization")?.replace("Bearer ", "") ||
-      req.cookies.get("onelink_session")?.value;
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const profileId = parseSessionToken(token);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const profile = await prisma.profile.findUnique({
       where: { id: profileId },
       include: {
-        links: { orderBy: { order: "asc" } },
         socialLinks: { orderBy: { order: "asc" } },
       },
     });
@@ -71,12 +60,12 @@ export async function PUT(req: NextRequest) {
         displayName: profile.displayName,
         bio: profile.bio,
         avatarUrl: profile.avatarUrl,
+        headerImage: profile.headerImage,
         theme: profile.theme,
         plan: profile.plan,
         views: profile.views,
-        loginCode: profile.loginCode,
+        email: profile.email,
       },
-      links: profile.links,
       socialLinks: profile.socialLinks,
     });
   } catch {

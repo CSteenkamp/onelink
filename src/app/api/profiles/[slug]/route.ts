@@ -22,6 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         displayName: profile.displayName,
         bio: profile.bio,
         avatarUrl: profile.avatarUrl,
+        headerImage: profile.headerImage,
         theme: profile.theme,
         plan: profile.plan,
         views: profile.views,
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
 export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    const profileId = getProfileIdFromRequest(req);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const profile = await prisma.profile.findUnique({ where: { slug: params.slug } });
@@ -45,7 +46,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     }
 
     const body = await req.json();
-    const { displayName, bio, avatarUrl, theme, email } = body;
+    const { displayName, bio, avatarUrl, headerImage, theme, email } = body;
 
     // Validate inputs
     if (displayName !== undefined && (displayName.trim().length < 1 || displayName.trim().length > 100)) {
@@ -56,6 +57,9 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     }
     if (avatarUrl !== undefined && avatarUrl !== "" && !isValidUrl(avatarUrl)) {
       return NextResponse.json({ error: "Avatar URL must be a valid http/https URL" }, { status: 400 });
+    }
+    if (headerImage !== undefined && headerImage !== "" && !isValidUrl(headerImage)) {
+      return NextResponse.json({ error: "Header image URL must be a valid http/https URL" }, { status: 400 });
     }
     if (theme !== undefined && !(theme in THEMES)) {
       return NextResponse.json({ error: "Invalid theme" }, { status: 400 });
@@ -70,6 +74,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
         ...(displayName !== undefined && { displayName: sanitizeString(displayName, 100) }),
         ...(bio !== undefined && { bio: bio ? sanitizeString(bio, 280) : null }),
         ...(avatarUrl !== undefined && { avatarUrl: avatarUrl || null }),
+        ...(headerImage !== undefined && { headerImage: headerImage || null }),
         ...(theme !== undefined && { theme }),
         ...(email !== undefined && { email: email || null }),
       },
@@ -82,10 +87,11 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
         displayName: updated.displayName,
         bio: updated.bio,
         avatarUrl: updated.avatarUrl,
+        headerImage: updated.headerImage,
         theme: updated.theme,
         plan: updated.plan,
         views: updated.views,
-        loginCode: updated.loginCode,
+        email: updated.email,
       },
     });
   } catch {

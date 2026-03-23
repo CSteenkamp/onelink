@@ -40,13 +40,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
 
-    if (STRIPE_WEBHOOK_SECRET) {
-      const sigHeader = req.headers.get("stripe-signature");
-      if (!sigHeader || !verifyStripeSignature(body, sigHeader, STRIPE_WEBHOOK_SECRET)) {
-        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-      }
-    } else {
-      console.warn("STRIPE_WEBHOOK_SECRET not set — webhook signature verification disabled");
+    if (!STRIPE_WEBHOOK_SECRET) {
+      console.error("STRIPE_WEBHOOK_SECRET not set — rejecting webhook");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    }
+
+    const sigHeader = req.headers.get("stripe-signature");
+    if (!sigHeader || !verifyStripeSignature(body, sigHeader, STRIPE_WEBHOOK_SECRET)) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const event = JSON.parse(body);

@@ -49,6 +49,7 @@ export default async function ProfilePage({ params }: Props) {
           displayName: profile.displayName,
           bio: profile.bio,
           avatarUrl: profile.avatarUrl,
+          headerImage: profile.headerImage,
           theme: themeId,
           plan: profile.plan,
         }}

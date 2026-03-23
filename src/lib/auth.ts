@@ -2,12 +2,12 @@ import bcrypt from "bcryptjs";
 
 import crypto from "crypto";
 
-const JWT_SECRET = process.env.JWT_SECRET || "onelink-default-secret-change-me";
+const JWT_SECRET: string = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET environment variable is required");
+  return secret;
+})();
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-export function generateLoginCode(): string {
-  return crypto.randomBytes(6).toString("hex").toUpperCase();
-}
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -17,9 +17,10 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export function createSessionToken(profileId: string): string {
+export function createSessionToken(profileId: string, tokenVersion: number = 0): string {
   const payload = JSON.stringify({
     sub: profileId,
+    tv: tokenVersion,
     iat: Date.now(),
     exp: Date.now() + SESSION_MAX_AGE_MS,
   });
@@ -31,7 +32,12 @@ export function createSessionToken(profileId: string): string {
   return `${payloadB64}.${signature}`;
 }
 
-export function parseSessionToken(token: string): string | null {
+export interface SessionData {
+  profileId: string;
+  tokenVersion: number;
+}
+
+export function parseSessionToken(token: string): SessionData | null {
   try {
     const [payloadB64, signature] = token.split(".");
     if (!payloadB64 || !signature) return null;
@@ -42,7 +48,9 @@ export function parseSessionToken(token: string): string | null {
       .update(payloadB64)
       .digest("base64url");
 
-    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+    const sigBuf = Buffer.from(signature);
+    const expectedBuf = Buffer.from(expectedSig);
+    if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
       return null;
     }
 
@@ -52,17 +60,20 @@ export function parseSessionToken(token: string): string | null {
       return null;
     }
 
-    return payload.sub;
+    return { profileId: payload.sub, tokenVersion: payload.tv ?? 0 };
   } catch {
     return null;
   }
 }
 
 // Validation helpers
-const URL_REGEX = /^https?:\/\/.+/;
-
 export function isValidUrl(url: string): boolean {
-  return URL_REGEX.test(url);
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 export function isValidEmail(email: string): boolean {

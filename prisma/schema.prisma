@@ -15,9 +15,11 @@ model Profile {
   headerImage   String?
   theme         String         @default("midnight")
   customColor   String?
-  loginCode     String         @unique
   adminPassword String
-  email         String?
+  tokenVersion       Int       @default(0)
+  email              String    @unique
+  resetToken         String?   @unique
+  resetTokenExpiry   DateTime?
   plan          String         @default("free")
   views         Int            @default(0)
   createdAt     DateTime       @default(now())

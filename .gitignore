@@ -37,5 +37,6 @@ next-env.d.ts
 
 /src/generated/prisma
 .env
+.env.production
 k8s.yaml
 k8s.yaml

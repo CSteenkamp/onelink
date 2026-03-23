@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   hashPassword,
-  generateLoginCode,
   createSessionToken,
   isValidSlug,
   isValidUrl,
+  isValidEmail,
   sanitizeString,
 } from "@/lib/auth";
 
@@ -14,10 +14,15 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { slug, displayName, bio, avatarUrl, theme, password } = body;
+    const { slug, displayName, bio, avatarUrl, headerImage, theme, password, email } = body;
 
-    if (!slug || !displayName || !password) {
+    if (!slug || !displayName || !password || !email) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    if (!isValidEmail(cleanEmail)) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
 
     const cleanSlug = slug.toLowerCase().trim();
@@ -39,13 +44,20 @@ export async function POST(req: NextRequest) {
     if (avatarUrl && !isValidUrl(avatarUrl)) {
       return NextResponse.json({ error: "Avatar URL must be a valid http/https URL" }, { status: 400 });
     }
+    if (headerImage && !isValidUrl(headerImage)) {
+      return NextResponse.json({ error: "Header image URL must be a valid http/https URL" }, { status: 400 });
+    }
 
-    const existing = await prisma.profile.findUnique({ where: { slug: cleanSlug } });
-    if (existing) {
+    const existingSlug = await prisma.profile.findUnique({ where: { slug: cleanSlug } });
+    if (existingSlug) {
       return NextResponse.json({ error: "Username already taken" }, { status: 409 });
     }
 
-    const loginCode = generateLoginCode();
+    const existingEmail = await prisma.profile.findUnique({ where: { email: cleanEmail } });
+    if (existingEmail) {
+      return NextResponse.json({ error: "Email already in use" }, { status: 409 });
+    }
+
     const hashedPassword = await hashPassword(password);
 
     const profile = await prisma.profile.create({
@@ -54,18 +66,17 @@ export async function POST(req: NextRequest) {
         displayName: sanitizeString(displayName, 100),
         bio: bio ? sanitizeString(bio, 280) : null,
         avatarUrl: avatarUrl || null,
+        headerImage: headerImage || null,
         theme: theme || "midnight",
-        loginCode,
+        email: cleanEmail,
         adminPassword: hashedPassword,
       },
     });
 
-    const sessionToken = createSessionToken(profile.id);
+    const sessionToken = createSessionToken(profile.id, profile.tokenVersion);
 
     const response = NextResponse.json({
       profile: { id: profile.id, slug: profile.slug },
-      loginCode,
-      sessionToken,
     });
     response.cookies.set("onelink_session", sessionToken, {
       httpOnly: true,

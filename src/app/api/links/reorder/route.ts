@@ -4,7 +4,7 @@ import { getProfileIdFromRequest } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   try {
-    const profileId = getProfileIdFromRequest(req);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { linkIds } = await req.json();

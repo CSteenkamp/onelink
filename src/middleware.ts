@@ -39,6 +39,11 @@ const RATE_LIMITS: { pattern: RegExp; limit: number; windowMs: number }[] = [
   // Click/view tracking: 30 per minute per IP
   { pattern: /^\/api\/links\/[^/]+\/click$/, limit: 30, windowMs: 60 * 1000 },
   { pattern: /^\/api\/views\//, limit: 30, windowMs: 60 * 1000 },
+  // Password reset: 5 per hour
+  { pattern: /^\/api\/auth\/forgot-password$/, limit: 5, windowMs: 60 * 60 * 1000 },
+  { pattern: /^\/api\/auth\/reset-password$/, limit: 10, windowMs: 60 * 60 * 1000 },
+  // Image upload: 20 per hour
+  { pattern: /^\/api\/upload$/, limit: 20, windowMs: 60 * 60 * 1000 },
   // Slug check: 30 per minute
   { pattern: /^\/api\/profiles\/check-slug$/, limit: 30, windowMs: 60 * 1000 },
   // General API: 100 per minute
@@ -60,7 +65,7 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Content-Security-Policy":
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self' https://linkist-data.s3.us-east-1.amazonaws.com; frame-ancestors 'none';",
 };
 
 export function middleware(req: NextRequest) {

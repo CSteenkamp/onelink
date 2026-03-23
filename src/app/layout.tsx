@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import CookieNotice from "@/components/CookieNotice";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     "bio link page",
     "link in bio",
     "personal landing page",
-    "onelink",
+    "linkist",
   ],
   openGraph: {
     title: "Linkist — Your Internet, One Link",
@@ -58,6 +59,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-[family-name:var(--font-geist-sans)]`}
       >
         {children}
+        <CookieNotice />
       </body>
     </html>
   );

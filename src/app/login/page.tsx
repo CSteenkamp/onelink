@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [slug, setSlug] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,8 +14,8 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!slug || !password) {
-      setError("Please enter your username and password.");
+    if (!email || !password) {
+      setError("Please enter your email and password.");
       return;
     }
     setLoading(true);
@@ -23,7 +23,7 @@ export default function LoginPage() {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: slug.trim().toLowerCase(), password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -43,20 +43,20 @@ export default function LoginPage() {
     <main className="min-h-screen bg-[#0F172A] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Link href="/" className="text-2xl font-bold gradient-text inline-block mb-8">
-          🔗 Linkist
+          Linkist
         </Link>
 
         <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
-        <p className="text-gray-400 mb-8">Log in with your username and password.</p>
+        <p className="text-gray-400 mb-8">Enter your email and password to manage your page.</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
             <input
-              type="text"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
-              placeholder="yourname"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
             />
           </div>
@@ -67,9 +67,15 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your admin password"
+              placeholder="Your password"
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
             />
+            <Link
+              href="/forgot-password"
+              className="text-purple-400 hover:text-purple-300 text-xs mt-1 inline-block"
+            >
+              Forgot your password?
+            </Link>
           </div>
 
           {error && (

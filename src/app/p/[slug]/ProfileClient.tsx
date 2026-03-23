@@ -9,6 +9,7 @@ interface ProfileData {
   displayName: string;
   bio: string | null;
   avatarUrl: string | null;
+  headerImage: string | null;
   theme: string;
   plan: string;
 }
@@ -66,8 +67,20 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
   }
 
   return (
-    <main className={`min-h-screen ${theme.bg} flex flex-col items-center px-4 py-12`}>
+    <main className={`min-h-screen ${theme.bg} flex flex-col items-center px-4 ${profile.headerImage ? "pt-0 pb-12" : "py-12"}`}>
       <div className="w-full max-w-md">
+        {/* Header Image */}
+        {profile.headerImage && (
+          <div className="w-full h-48 -mx-4 mb-6 overflow-hidden rounded-b-2xl animate-fade-in" style={{ width: "calc(100% + 2rem)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={profile.headerImage}
+              alt="Header"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
         {/* Avatar */}
         <div className="flex flex-col items-center mb-6 animate-fade-in">
           <div className="avatar-ring mb-4">
@@ -157,7 +170,7 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
               href="/"
               className="text-gray-500 hover:text-gray-400 text-xs transition-colors"
             >
-              Powered by 🔗 Linkist
+              Powered by Linkist
             </Link>
           </div>
         )}

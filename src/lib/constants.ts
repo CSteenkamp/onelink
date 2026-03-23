@@ -1,21 +1,65 @@
 export const SOCIAL_PLATFORMS = [
-  { id: "twitter", name: "Twitter / X", color: "#1DA1F2", icon: "𝕏" },
-  { id: "instagram", name: "Instagram", color: "#E4405F", icon: "📷" },
-  { id: "tiktok", name: "TikTok", color: "#000000", icon: "🎵" },
-  { id: "youtube", name: "YouTube", color: "#FF0000", icon: "▶️" },
-  { id: "twitch", name: "Twitch", color: "#9146FF", icon: "🎮" },
-  { id: "onlyfans", name: "OnlyFans", color: "#00AFF0", icon: "💎" },
-  { id: "spotify", name: "Spotify", color: "#1DB954", icon: "🎧" },
-  { id: "github", name: "GitHub", color: "#333333", icon: "💻" },
-  { id: "linkedin", name: "LinkedIn", color: "#0077B5", icon: "💼" },
-  { id: "facebook", name: "Facebook", color: "#1877F2", icon: "📘" },
-  { id: "snapchat", name: "Snapchat", color: "#FFFC00", icon: "👻" },
-  { id: "discord", name: "Discord", color: "#5865F2", icon: "🎙️" },
-  { id: "telegram", name: "Telegram", color: "#26A5E4", icon: "✈️" },
-  { id: "whatsapp", name: "WhatsApp", color: "#25D366", icon: "📱" },
-  { id: "email", name: "Email", color: "#6B7280", icon: "✉️" },
-  { id: "website", name: "Website", color: "#FFFFFF", icon: "🌐" },
+  { id: "twitter", name: "Twitter / X", color: "#1DA1F2", icon: "𝕏", placeholder: "@username", inputType: "text" as const },
+  { id: "instagram", name: "Instagram", color: "#E4405F", icon: "📷", placeholder: "https://instagram.com/...", inputType: "url" as const },
+  { id: "tiktok", name: "TikTok", color: "#000000", icon: "🎵", placeholder: "https://tiktok.com/@...", inputType: "url" as const },
+  { id: "youtube", name: "YouTube", color: "#FF0000", icon: "▶️", placeholder: "https://youtube.com/...", inputType: "url" as const },
+  { id: "twitch", name: "Twitch", color: "#9146FF", icon: "🎮", placeholder: "https://twitch.tv/...", inputType: "url" as const },
+  { id: "onlyfans", name: "OnlyFans", color: "#00AFF0", icon: "💎", placeholder: "https://onlyfans.com/...", inputType: "url" as const },
+  { id: "spotify", name: "Spotify", color: "#1DB954", icon: "🎧", placeholder: "https://open.spotify.com/...", inputType: "url" as const },
+  { id: "github", name: "GitHub", color: "#333333", icon: "💻", placeholder: "https://github.com/...", inputType: "url" as const },
+  { id: "linkedin", name: "LinkedIn", color: "#0077B5", icon: "💼", placeholder: "https://linkedin.com/in/...", inputType: "url" as const },
+  { id: "facebook", name: "Facebook", color: "#1877F2", icon: "📘", placeholder: "https://facebook.com/...", inputType: "url" as const },
+  { id: "snapchat", name: "Snapchat", color: "#FFFC00", icon: "👻", placeholder: "username", inputType: "text" as const },
+  { id: "discord", name: "Discord", color: "#5865F2", icon: "🎙️", placeholder: "username or invite link", inputType: "text" as const },
+  { id: "telegram", name: "Telegram", color: "#26A5E4", icon: "✈️", placeholder: "@username", inputType: "text" as const },
+  { id: "whatsapp", name: "WhatsApp", color: "#25D366", icon: "📱", placeholder: "+1234567890", inputType: "tel" as const },
+  { id: "email", name: "Email", color: "#6B7280", icon: "✉️", placeholder: "you@example.com", inputType: "email" as const },
+  { id: "website", name: "Website", color: "#FFFFFF", icon: "🌐", placeholder: "https://...", inputType: "url" as const },
 ] as const;
+
+/**
+ * Convert user input to a clickable URL based on platform.
+ * Handles usernames, phone numbers, emails, and already-valid URLs.
+ */
+export function formatSocialUrl(platformId: string, input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed) return trimmed;
+
+  switch (platformId) {
+    case "twitter": {
+      if (trimmed.startsWith("http")) return trimmed;
+      const handle = trimmed.replace(/^@/, "");
+      return `https://x.com/${handle}`;
+    }
+    case "discord": {
+      if (trimmed.startsWith("http")) return trimmed;
+      // Discord invite codes
+      if (/^[a-zA-Z0-9]+$/.test(trimmed)) return `https://discord.gg/${trimmed}`;
+      return trimmed;
+    }
+    case "whatsapp": {
+      if (trimmed.startsWith("http")) return trimmed;
+      const phone = trimmed.replace(/[^0-9+]/g, "").replace(/^\+/, "");
+      return `https://wa.me/${phone}`;
+    }
+    case "telegram": {
+      if (trimmed.startsWith("http")) return trimmed;
+      const username = trimmed.replace(/^@/, "");
+      return `https://t.me/${username}`;
+    }
+    case "snapchat": {
+      if (trimmed.startsWith("http")) return trimmed;
+      return `https://snapchat.com/add/${trimmed}`;
+    }
+    case "email": {
+      if (trimmed.startsWith("mailto:")) return trimmed;
+      if (trimmed.includes("@")) return `mailto:${trimmed}`;
+      return trimmed;
+    }
+    default:
+      return trimmed;
+  }
+}
 
 export type SocialPlatformId = (typeof SOCIAL_PLATFORMS)[number]["id"];
 

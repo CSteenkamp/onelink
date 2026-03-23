@@ -5,7 +5,7 @@ import { isValidUrl, sanitizeString } from "@/lib/auth";
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const profileId = getProfileIdFromRequest(req);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const link = await prisma.link.findUnique({ where: { id: params.id } });
@@ -35,7 +35,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const profileId = getProfileIdFromRequest(req);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const link = await prisma.link.findUnique({ where: { id: params.id } });

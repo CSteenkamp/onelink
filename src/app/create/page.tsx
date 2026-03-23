@@ -1,81 +1,25 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { THEMES, type ThemeId } from "@/lib/constants";
 
-function resizeImage(file: File, maxSize: number): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
-    reader.onload = () => {
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
-        if (width > maxSize || height > maxSize) {
-          if (width > height) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
-          } else {
-            width = Math.round((width * maxSize) / height);
-            height = maxSize;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", 0.85);
-        resolve(dataUrl);
-      };
-      img.onerror = () => reject(new Error("Failed to load image"));
-      img.src = reader.result as string;
-    };
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function CreateProfile() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [slug, setSlug] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  const [email, setEmail] = useState("");
   const [theme, setTheme] = useState<ThemeId>("midnight");
   const [password, setPassword] = useState("");
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [slugChecking, setSlugChecking] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [avatarError, setAvatarError] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const selectedTheme = THEMES[theme];
-
-  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatarError("");
-
-    const validTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      setAvatarError("Only JPEG, PNG, and WebP images are allowed.");
-      return;
-    }
-    if (file.size > 500 * 1024) {
-      setAvatarError("Image must be under 500KB.");
-      return;
-    }
-
-    try {
-      const dataUrl = await resizeImage(file, 200);
-      setAvatarUrl(dataUrl);
-    } catch {
-      setAvatarError("Failed to process image.");
-    }
-  }
 
   async function checkSlug(value: string) {
     const cleaned = value.toLowerCase().replace(/[^a-z0-9-_]/g, "");
@@ -102,7 +46,7 @@ export default function CreateProfile() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!slug || !displayName || !password) {
+    if (!slug || !displayName || !password || !email) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -119,7 +63,7 @@ export default function CreateProfile() {
       const res = await fetch("/api/profiles/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, displayName, bio, avatarUrl, theme, password }),
+        body: JSON.stringify({ slug, displayName, bio, email, theme, password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -128,7 +72,7 @@ export default function CreateProfile() {
         return;
       }
       // Cookie is set server-side with HttpOnly flag
-      router.push(`/admin?loginCode=${data.loginCode}`);
+      router.push("/admin");
     } catch {
       setError("Network error. Please try again.");
       setSubmitting(false);
@@ -139,7 +83,7 @@ export default function CreateProfile() {
     <main className="min-h-screen bg-[#0F172A] px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <Link href="/" className="text-2xl font-bold gradient-text inline-block mb-8">
-          🔗 Linkist
+          Linkist
         </Link>
 
         <h1 className="text-3xl font-bold text-white mb-2">Create your Linkist</h1>
@@ -167,6 +111,20 @@ export default function CreateProfile() {
                 {slugChecking && <p className="text-gray-400 text-xs mt-1">Checking...</p>}
                 {slugAvailable === true && <p className="text-green-400 text-xs mt-1">Available!</p>}
                 {slugAvailable === false && <p className="text-red-400 text-xs mt-1">Already taken.</p>}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email <span className="text-pink-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+                />
               </div>
 
               {/* Display name */}
@@ -197,54 +155,6 @@ export default function CreateProfile() {
                 />
               </div>
 
-              {/* Avatar Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Avatar</label>
-                <div className="flex items-center gap-4">
-                  <div className="shrink-0">
-                    {avatarUrl ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={avatarUrl}
-                        alt="Avatar preview"
-                        className="w-16 h-16 rounded-full object-cover border-2 border-purple-500/50"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-white/10 border-2 border-dashed border-white/20 flex items-center justify-center text-gray-500 text-xl">
-                        {displayName ? displayName.charAt(0).toUpperCase() : "?"}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
-                    >
-                      {avatarUrl ? "Change Photo" : "Upload Photo"}
-                    </button>
-                    {avatarUrl && (
-                      <button
-                        type="button"
-                        onClick={() => { setAvatarUrl(""); if (fileInputRef.current) fileInputRef.current.value = ""; }}
-                        className="ml-2 text-sm text-red-400 hover:text-red-300"
-                      >
-                        Remove
-                      </button>
-                    )}
-                    <p className="text-gray-500 text-xs mt-1">JPEG, PNG, or WebP. Max 500KB.</p>
-                    {avatarError && <p className="text-red-400 text-xs mt-1">{avatarError}</p>}
-                  </div>
-                </div>
-              </div>
-
               {/* Theme */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Theme</label>
@@ -270,7 +180,6 @@ export default function CreateProfile() {
                 <LivePreview
                   displayName={displayName}
                   bio={bio}
-                  avatarUrl={avatarUrl}
                   theme={selectedTheme}
                 />
               </div>
@@ -278,7 +187,7 @@ export default function CreateProfile() {
               {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Admin Password <span className="text-pink-500">*</span>
+                  Password <span className="text-pink-500">*</span>
                 </label>
                 <input
                   type="password"
@@ -290,6 +199,26 @@ export default function CreateProfile() {
                 <p className="text-gray-500 text-xs mt-1">You&apos;ll use this to manage your page later.</p>
               </div>
 
+              {/* Terms Agreement */}
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 accent-purple-500"
+                />
+                <span className="text-gray-400 text-sm">
+                  I agree to the{" "}
+                  <Link href="/terms" target="_blank" className="text-purple-400 hover:text-purple-300">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" target="_blank" className="text-purple-400 hover:text-purple-300">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </label>
+
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
                   {error}
@@ -298,7 +227,7 @@ export default function CreateProfile() {
 
               <button
                 type="submit"
-                disabled={submitting || slugAvailable === false}
+                disabled={submitting || slugAvailable === false || !agreedToTerms}
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-full font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {submitting ? "Creating..." : "Create My Linkist"}
@@ -320,7 +249,6 @@ export default function CreateProfile() {
               <LivePreview
                 displayName={displayName}
                 bio={bio}
-                avatarUrl={avatarUrl}
                 theme={selectedTheme}
               />
             </div>
@@ -334,12 +262,10 @@ export default function CreateProfile() {
 function LivePreview({
   displayName,
   bio,
-  avatarUrl,
   theme,
 }: {
   displayName: string;
   bio: string;
-  avatarUrl: string;
   theme: (typeof THEMES)[ThemeId];
 }) {
   const name = displayName || "Your Name";
@@ -350,18 +276,9 @@ function LivePreview({
       <div className="flex flex-col items-center text-center">
         {/* Avatar */}
         <div className="avatar-ring mb-3">
-          {avatarUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={avatarUrl}
-              alt="Preview"
-              className="w-16 h-16 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-2xl">
-              {name.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-2xl">
+            {name.charAt(0).toUpperCase()}
+          </div>
         </div>
 
         {/* Name */}

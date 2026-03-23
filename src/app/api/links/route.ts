@@ -6,7 +6,7 @@ import { PLAN_LIMITS } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   try {
-    const profileId = getProfileIdFromRequest(req);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const links = await prisma.link.findMany({
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const profileId = getProfileIdFromRequest(req);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const profile = await prisma.profile.findUnique({ where: { id: profileId } });

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 function ProfileMockup() {
   return (
@@ -41,7 +42,7 @@ export default function Home() {
     <main className="min-h-screen bg-[#0F172A]">
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-        <div className="text-2xl font-bold gradient-text">🔗 Linkist</div>
+        <div className="text-2xl font-bold gradient-text">Linkist</div>
         <div className="flex items-center gap-4">
           <Link href="/login" className="text-gray-400 hover:text-white transition-colors text-sm">
             Log In
@@ -77,7 +78,7 @@ export default function Home() {
                 Create Your Linkist — Free
               </Link>
             </div>
-            <p className="text-gray-500 text-sm mt-4">No signup needed. Build and share in under 60 seconds.</p>
+            <p className="text-gray-500 text-sm mt-4">Build and share in under 60 seconds.</p>
           </div>
           <div className="animate-fade-in-delay-1">
             <ProfileMockup />
@@ -117,7 +118,7 @@ export default function Home() {
             Why Linkist?
           </h2>
           <p className="text-gray-400 text-center mb-12">
-            Same features, fraction of the cost. No subscriptions.
+            Same features, fraction of the cost.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full max-w-2xl mx-auto">
@@ -134,7 +135,6 @@ export default function Home() {
                   ["Custom themes", "Pro only", "Free ✓"],
                   ["Analytics", "Pro only", "Pro"],
                   ["Social icons", "✓", "✓"],
-                  ["No signup needed", "✗", "✓"],
                   ["Creator-friendly", "Bans creators", "Everyone welcome"],
                 ].map(([feature, linktree, onelink]) => (
                   <tr key={feature} className="border-b border-white/5">
@@ -156,7 +156,7 @@ export default function Home() {
             Simple pricing
           </h2>
           <p className="text-gray-400 text-center mb-12">
-            Start free. Upgrade once. No subscriptions ever.
+            Start free. Upgrade when you need more.
           </p>
           <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             {/* Free */}
@@ -166,7 +166,7 @@ export default function Home() {
                 $0 <span className="text-sm font-normal text-gray-400">forever</span>
               </div>
               <ul className="space-y-3 text-gray-300 text-sm mb-8">
-                {["5 links", "All 7 themes", "Social icons", "Shareable page", "Custom bio & avatar"].map((f) => (
+                {["5 links", "All themes", "Social icons", "Shareable page", "Custom bio & avatar"].map((f) => (
                   <li key={f} className="flex items-center gap-2">
                     <span className="text-green-400">✓</span> {f}
                   </li>
@@ -188,7 +188,7 @@ export default function Home() {
               <div className="text-3xl font-bold text-white mb-1">
                 $1 <span className="text-sm font-normal text-gray-400">per month</span>
               </div>
-              <p className="text-gray-400 text-sm mb-6">That&apos;s 20× cheaper than Linktree Pro</p>
+              <p className="text-gray-400 text-sm mb-6">That&apos;s 20x cheaper than Linktree Pro</p>
               <ul className="space-y-3 text-gray-300 text-sm mb-8">
                 {[
                   "Unlimited links",
@@ -258,7 +258,7 @@ export default function Home() {
             applicationCategory: "UtilityApplication",
             offers: [
               { "@type": "Offer", price: "0", priceCurrency: "USD", name: "Free" },
-              { "@type": "Offer", price: "3", priceCurrency: "USD", name: "Pro" },
+              { "@type": "Offer", price: "1", priceCurrency: "USD", name: "Pro" },
             ],
           }),
         }}
@@ -291,13 +291,14 @@ export default function Home() {
                 name: "Is Linkist better than Linktree?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Linkist offers similar features to Linktree Pro at a fraction of the cost — $1/month vs $5/month. No signup needed, and all themes are free.",
+                  text: "Linkist offers similar features to Linktree Pro at a fraction of the cost — $1/month vs $5/month. All themes are free.",
                 },
               },
             ],
           }),
         }}
       />
+      <Footer />
     </main>
   );
 }
