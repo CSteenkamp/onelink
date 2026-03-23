@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseSessionToken } from "@/lib/auth";
 
-const PRICE_ID = process.env.STRIPE_PRICE_ID || "price_1TDOkxBiNvYQF2cPip69DIa0";
+const PRICE_ID = process.env.STRIPE_PRICE_ID || "price_1TE8IeBiNvYQF2cP7JL6ihgk";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const origin = req.headers.get("origin") || "https://linkist.vip";
 
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: "subscription",
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       metadata: { profileId },
       success_url: `${origin}/admin?upgraded=true`,

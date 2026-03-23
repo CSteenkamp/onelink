@@ -64,14 +64,34 @@ export async function POST(req: NextRequest) {
           create: {
             profileId,
             stripeCustomerId: session.customer,
+            stripeSubscriptionId: session.subscription,
             plan: "pro",
             status: "active",
           },
           update: {
             stripeCustomerId: session.customer,
+            stripeSubscriptionId: session.subscription,
             plan: "pro",
             status: "active",
           },
+        });
+      }
+    }
+
+    if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object;
+      const customerId = subscription.customer;
+      const sub = await prisma.subscription.findFirst({
+        where: { stripeCustomerId: customerId },
+      });
+      if (sub) {
+        await prisma.subscription.update({
+          where: { id: sub.id },
+          data: { status: "cancelled" },
+        });
+        await prisma.profile.update({
+          where: { id: sub.profileId },
+          data: { plan: "free" },
         });
       }
     }

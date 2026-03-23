@@ -67,7 +67,7 @@ export default function Home() {
             <p className="text-gray-400 text-lg md:text-xl mb-8 max-w-lg">
               Create your personal landing page in 60 seconds. All your links, socials, and content
               — one beautiful page. <span className="text-white font-medium">Free forever</span>,
-              $10 to unlock everything.
+              $1/mo to unlock everything.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -130,7 +130,7 @@ export default function Home() {
               </thead>
               <tbody className="text-sm">
                 {[
-                  ["Price", "$5/month ($60/yr)", "$10 once (forever)"],
+                  ["Price", "$5/month ($60/yr)", "$1/mo"],
                   ["Custom themes", "Pro only", "Free ✓"],
                   ["Analytics", "Pro only", "Pro"],
                   ["Social icons", "✓", "✓"],
@@ -186,7 +186,7 @@ export default function Home() {
               </div>
               <h3 className="text-white font-bold text-xl mb-1">Pro</h3>
               <div className="text-3xl font-bold text-white mb-1">
-                $10 <span className="text-sm font-normal text-gray-400">one-time</span>
+                $1 <span className="text-sm font-normal text-gray-400">per month</span>
               </div>
               <p className="text-gray-400 text-sm mb-6">That&apos;s 20× cheaper than Linktree Pro</p>
               <ul className="space-y-3 text-gray-300 text-sm mb-8">
@@ -283,7 +283,7 @@ export default function Home() {
                 name: "How much does Linkist cost?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Linkist is free forever with 5 links and all themes. Pro is a one-time $10 payment for unlimited links, analytics, and more.",
+                  text: "Linkist is free forever with 5 links and all themes. Pro is just $1/month for unlimited links, analytics, and more.",
                 },
               },
               {
@@ -291,7 +291,7 @@ export default function Home() {
                 name: "Is Linkist better than Linktree?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Linkist offers similar features to Linktree Pro at a fraction of the cost — $10 one-time vs $5/month. No signup needed, and all themes are free.",
+                  text: "Linkist offers similar features to Linktree Pro at a fraction of the cost — $1/month vs $5/month. No signup needed, and all themes are free.",
                 },
               },
             ],

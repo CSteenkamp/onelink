@@ -292,7 +292,7 @@ function AdminPage() {
                 }}
                 className="text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1.5 rounded-lg font-medium"
               >
-                Upgrade to Pro — $10
+                Upgrade to Pro — $1/mo
               </button>
             )}
           </div>

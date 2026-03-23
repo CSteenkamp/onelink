@@ -56,8 +56,9 @@ model SocialLink {
 model Subscription {
   id               String   @id @default(cuid())
   profileId        String   @unique
-  stripeCustomerId String?
-  plan             String   @default("free")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  plan                 String   @default("free")
   status           String   @default("active")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

@@ -16,7 +16,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Linkist — Your Internet, One Link",
   description:
-    "Create your personal landing page in 60 seconds. All your links, socials, and content — one beautiful page. Free forever, $10 to unlock everything.",
+    "Create your personal landing page in 60 seconds. All your links, socials, and content — one beautiful page. Free forever, $1/mo to unlock everything.",
   keywords: [
     "free linktree alternative",
     "bio link page",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Linkist — Your Internet, One Link",
     description:
-      "Create your personal landing page in 60 seconds. Free forever, $10 to unlock everything.",
+      "Create your personal landing page in 60 seconds. Free forever, $1/mo to unlock everything.",
   },
   alternates: {
     canonical: "https://linkist.vip",
