@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: linkist-config
+  namespace: linkist
+data:
+  AWS_S3_BUCKET: "linkist-data"
+  AWS_REGION: "us-east-1"
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+  SMTP_SECURE: "false"
+  SMTP_USER: "2flippingeasy@gmail.com"
+  SMTP_FROM: "2flippingeasy@gmail.com"
+  NEXT_PUBLIC_BASE_URL: "https://linkist.vip"

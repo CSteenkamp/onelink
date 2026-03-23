@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linkist-app
+  namespace: linkist
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: linkist-app
+  template:
+    metadata:
+      labels:
+        app: linkist-app
+    spec:
+      initContainers:
+        - name: migrate
+          image: ghcr.io/csteenkamp/onelink:latest
+          command: ["npx", "prisma", "migrate", "deploy"]
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://linkist:$(DB_PASSWORD)@postgres:5432/linkist"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: DB_PASSWORD
+      containers:
+        - name: app
+          image: ghcr.io/csteenkamp/onelink:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: DB_PASSWORD
+            - name: DATABASE_URL
+              value: "postgresql://linkist:$(DB_PASSWORD)@postgres:5432/linkist"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: JWT_SECRET
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: STRIPE_WEBHOOK_SECRET
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: SMTP_PASS
+          envFrom:
+            - configMapRef:
+                name: linkist-config
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: linkist-app
+  namespace: linkist
+spec:
+  selector:
+    app: linkist-app
+  ports:
+    - port: 80
+      targetPort: 3000
