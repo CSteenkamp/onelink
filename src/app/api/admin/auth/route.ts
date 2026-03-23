@@ -49,6 +49,7 @@ export async function PUT(req: NextRequest) {
       where: { id: profileId },
       include: {
         socialLinks: { orderBy: { order: "asc" } },
+        subscription: { select: { status: true } },
       },
     });
     if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
@@ -65,6 +66,7 @@ export async function PUT(req: NextRequest) {
         plan: profile.plan,
         views: profile.views,
         email: profile.email,
+        subscriptionStatus: profile.subscription?.status || null,
       },
       socialLinks: profile.socialLinks,
     });

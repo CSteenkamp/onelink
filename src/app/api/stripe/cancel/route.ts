@@ -41,6 +41,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Mark subscription as cancelling in our database
+    await prisma.subscription.update({
+      where: { profileId },
+      data: { status: "cancelling" },
+    });
+
     return NextResponse.json({ success: true, endDate });
   } catch (err) {
     console.error("Stripe cancel error:", err);

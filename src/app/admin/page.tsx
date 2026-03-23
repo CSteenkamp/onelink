@@ -17,6 +17,7 @@ interface ProfileData {
   plan: string;
   views: number;
   email: string;
+  subscriptionStatus: string | null;
 }
 
 interface SocialLinkData {
@@ -354,11 +355,15 @@ function AdminPage() {
               </a>
             </div>
 
-            {/* Cancel Subscription */}
+            {/* Subscription Management */}
             {isPro && (
               <div className="bg-white/5 rounded-xl p-6 border border-white/10">
                 <h3 className="text-white font-medium mb-2">Subscription</h3>
-                {cancelMsg ? (
+                {profile.subscriptionStatus === "cancelling" ? (
+                  <p className="text-amber-400 text-sm">
+                    Your subscription is set to cancel at the end of your billing period. You&apos;ll keep Pro features until then.
+                  </p>
+                ) : cancelMsg ? (
                   <p className="text-amber-400 text-sm">{cancelMsg}</p>
                 ) : !cancelConfirm ? (
                   <div>
@@ -386,7 +391,7 @@ function AdminPage() {
                             const res = await authFetch("/api/stripe/cancel", { method: "POST" });
                             if (res.ok) {
                               const data = await res.json();
-                              setCancelMsg(`Subscription cancelled. You'll keep Pro features until ${data.endDate || "the end of your billing period"}.`);
+                              setCancelMsg(`Subscription cancelled. You'll keep Pro features until ${data.endDate}.`);
                             } else {
                               const data = await res.json();
                               setCancelMsg(data.error || "Failed to cancel.");
