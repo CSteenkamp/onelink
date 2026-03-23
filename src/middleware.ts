@@ -24,9 +24,9 @@ function rateLimit(
 // Cleanup stale entries every 5 minutes
 setInterval(() => {
   const now = Date.now();
-  for (const [key, entry] of rateLimitMap) {
+  rateLimitMap.forEach((entry, key) => {
     if (now > entry.resetAt) rateLimitMap.delete(key);
-  }
+  });
 }, 5 * 60 * 1000);
 
 // Rate limit configs per route pattern

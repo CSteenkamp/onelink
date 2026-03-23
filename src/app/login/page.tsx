@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loginCode, setLoginCode] = useState("");
+  const [slug, setSlug] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,8 +14,8 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!loginCode || !password) {
-      setError("Please enter your login code and password.");
+    if (!slug || !password) {
+      setError("Please enter your username and password.");
       return;
     }
     setLoading(true);
@@ -23,7 +23,7 @@ export default function LoginPage() {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ loginCode: loginCode.trim().toUpperCase(), password }),
+        body: JSON.stringify({ slug: slug.trim().toLowerCase(), password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -43,26 +43,26 @@ export default function LoginPage() {
     <main className="min-h-screen bg-[#0F172A] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Link href="/" className="text-2xl font-bold gradient-text inline-block mb-8">
-          🔗 OneLink
+          🔗 Linkist
         </Link>
 
         <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
-        <p className="text-gray-400 mb-8">Enter your login code and password to manage your page.</p>
+        <p className="text-gray-400 mb-8">Log in with your username and password.</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Login Code</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
             <input
               type="text"
-              value={loginCode}
-              onChange={(e) => setLoginCode(e.target.value.toUpperCase())}
-              placeholder="e.g. A1B2C3D4E5F6"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors font-mono tracking-wider"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
+              placeholder="yourname"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Admin Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
             <input
               type="password"
               value={password}
@@ -90,7 +90,7 @@ export default function LoginPage() {
         <p className="text-center text-gray-500 text-sm mt-6">
           Don&apos;t have one?{" "}
           <Link href="/create" className="text-purple-400 hover:text-purple-300">
-            Create your OneLink
+            Create your Linkist
           </Link>
         </p>
       </div>

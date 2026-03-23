@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
+
 import crypto from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET || "onelink-default-secret-change-me";

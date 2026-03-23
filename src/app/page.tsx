@@ -30,7 +30,7 @@ function ProfileMockup() {
             {link}
           </div>
         ))}
-        <p className="text-center text-gray-500 text-xs mt-4">Powered by OneLink</p>
+        <p className="text-center text-gray-500 text-xs mt-4">Powered by Linkist</p>
       </div>
     </div>
   );
@@ -41,7 +41,7 @@ export default function Home() {
     <main className="min-h-screen bg-[#0F172A]">
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-        <div className="text-2xl font-bold gradient-text">🔗 OneLink</div>
+        <div className="text-2xl font-bold gradient-text">🔗 Linkist</div>
         <div className="flex items-center gap-4">
           <Link href="/login" className="text-gray-400 hover:text-white transition-colors text-sm">
             Log In
@@ -74,7 +74,7 @@ export default function Home() {
                 href="/create"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:opacity-90 transition-opacity text-center"
               >
-                Create Your OneLink — Free
+                Create Your Linkist — Free
               </Link>
             </div>
             <p className="text-gray-500 text-sm mt-4">No signup needed. Build and share in under 60 seconds.</p>
@@ -114,7 +114,7 @@ export default function Home() {
       <section className="px-6 py-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-4">
-            Why OneLink?
+            Why Linkist?
           </h2>
           <p className="text-gray-400 text-center mb-12">
             Same features, fraction of the cost. No subscriptions.
@@ -125,7 +125,7 @@ export default function Home() {
                 <tr className="border-b border-white/10">
                   <th className="text-left text-gray-400 py-4 px-4 font-medium">Feature</th>
                   <th className="text-center text-gray-400 py-4 px-4 font-medium">Linktree</th>
-                  <th className="text-center py-4 px-4 font-medium gradient-text">OneLink</th>
+                  <th className="text-center py-4 px-4 font-medium gradient-text">Linkist</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
@@ -227,7 +227,7 @@ export default function Home() {
             href="/create"
             className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-4 rounded-full text-lg font-semibold hover:opacity-90 transition-opacity"
           >
-            Create Your OneLink — Free
+            Create Your Linkist — Free
           </Link>
         </div>
       </section>
@@ -236,7 +236,7 @@ export default function Home() {
       <footer className="border-t border-white/10 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} OneLink. Your internet, one link.
+            © {new Date().getFullYear()} Linkist. Your internet, one link.
           </div>
           <div className="flex gap-6 text-sm text-gray-500">
             <Link href="/create" className="hover:text-white transition-colors">Create</Link>
@@ -252,8 +252,8 @@ export default function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            name: "OneLink",
-            url: "https://onelink.wagnerway.co.za",
+            name: "Linkist",
+            url: "https://linkist.vip",
             description: "Create your personal landing page in 60 seconds. All your links, socials, and content — one beautiful page.",
             applicationCategory: "UtilityApplication",
             offers: [
@@ -272,26 +272,26 @@ export default function Home() {
             mainEntity: [
               {
                 "@type": "Question",
-                name: "What is OneLink?",
+                name: "What is Linkist?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "OneLink is a personal landing page builder that lets you create a beautiful page with all your links, socials, and content in under 60 seconds.",
+                  text: "Linkist is a personal landing page builder that lets you create a beautiful page with all your links, socials, and content in under 60 seconds.",
                 },
               },
               {
                 "@type": "Question",
-                name: "How much does OneLink cost?",
+                name: "How much does Linkist cost?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "OneLink is free forever with 5 links and all themes. Pro is a one-time $10 payment for unlimited links, analytics, and more.",
+                  text: "Linkist is free forever with 5 links and all themes. Pro is a one-time $10 payment for unlimited links, analytics, and more.",
                 },
               },
               {
                 "@type": "Question",
-                name: "Is OneLink better than Linktree?",
+                name: "Is Linkist better than Linktree?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "OneLink offers similar features to Linktree Pro at a fraction of the cost — $10 one-time vs $5/month. No signup needed, and all themes are free.",
+                  text: "Linkist offers similar features to Linktree Pro at a fraction of the cost — $10 one-time vs $5/month. No signup needed, and all themes are free.",
                 },
               },
             ],

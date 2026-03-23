@@ -4,15 +4,22 @@ import { verifyPassword, createSessionToken, parseSessionToken } from "@/lib/aut
 
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
 
-// POST: Login with code + password
+// POST: Login with slug + password (also supports legacy loginCode)
 export async function POST(req: NextRequest) {
   try {
-    const { loginCode, password } = await req.json();
-    if (!loginCode || !password) {
+    const body = await req.json();
+    const { slug, loginCode, password } = body;
+
+    if ((!slug && !loginCode) || !password) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
     }
 
-    const profile = await prisma.profile.findUnique({ where: { loginCode } });
+    let profile;
+    if (slug) {
+      profile = await prisma.profile.findUnique({ where: { slug: slug.trim().toLowerCase() } });
+    } else {
+      profile = await prisma.profile.findUnique({ where: { loginCode: loginCode.trim().toUpperCase() } });
+    }
 
     // Constant-time: always verify even if profile not found (prevents timing attack)
     const valid = profile
@@ -20,7 +27,7 @@ export async function POST(req: NextRequest) {
       : await verifyPassword(password, "$2a$12$invalidhashpaddingtopreventshortexit");
 
     if (!profile || !valid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
     }
 
     const sessionToken = createSessionToken(profile.id);

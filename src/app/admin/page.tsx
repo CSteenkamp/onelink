@@ -1,9 +1,41 @@
 "use client";
 
-import { Suspense, useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { THEMES, SOCIAL_PLATFORMS, STRIPE_PAYMENT_LINK, type ThemeId } from "@/lib/constants";
+import { THEMES, SOCIAL_PLATFORMS, type ThemeId } from "@/lib/constants";
+
+function resizeImage(file: File, maxSize: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = () => {
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", 0.85);
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
 
 interface ProfileData {
   id: string;
@@ -74,6 +106,10 @@ function AdminPage() {
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [newLinkIcon, setNewLinkIcon] = useState("");
 
+  // Avatar upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarError, setAvatarError] = useState("");
+
   // New social
   const [newSocialPlatform, setNewSocialPlatform] = useState("twitter");
   const [newSocialUrl, setNewSocialUrl] = useState("");
@@ -105,6 +141,29 @@ function AdminPage() {
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarError("");
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setAvatarError("Only JPEG, PNG, and WebP images are allowed.");
+      return;
+    }
+    if (file.size > 500 * 1024) {
+      setAvatarError("Image must be under 500KB.");
+      return;
+    }
+
+    try {
+      const dataUrl = await resizeImage(file, 200);
+      setAvatarUrl(dataUrl);
+    } catch {
+      setAvatarError("Failed to process image.");
+    }
+  }
 
   async function saveProfile() {
     if (!profile) return;
@@ -211,7 +270,7 @@ function AdminPage() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="text-xl font-bold gradient-text">🔗 OneLink</Link>
+          <Link href="/" className="text-xl font-bold gradient-text">🔗 Linkist</Link>
           <div className="flex items-center gap-3">
             <a
               href={`/p/${profile.slug}`}
@@ -222,25 +281,29 @@ function AdminPage() {
               Preview ↗
             </a>
             {!isPro && (
-              <a
-                href={STRIPE_PAYMENT_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/stripe/checkout", { method: "POST" });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                    else alert(data.error || "Failed to start checkout");
+                  } catch { alert("Network error"); }
+                }}
                 className="text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1.5 rounded-lg font-medium"
               >
                 Upgrade to Pro — $10
-              </a>
+              </button>
             )}
           </div>
         </div>
 
-        {/* Login code banner */}
+        {/* Welcome banner */}
         {showLoginCode && (
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 mb-6">
-            <p className="text-purple-300 text-sm font-medium mb-1">Save your login code!</p>
-            <p className="text-white font-mono text-lg tracking-wider">{profile.loginCode}</p>
+            <p className="text-purple-300 text-sm font-medium mb-1">Your page is ready!</p>
             <p className="text-gray-400 text-xs mt-1">
-              You&apos;ll need this code + your password to log back in.
+              Log in anytime with your username <span className="text-white font-medium">{profile.slug}</span> and your password.
             </p>
           </div>
         )}
@@ -284,13 +347,50 @@ function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Avatar URL</label>
-              <input
-                type="url"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 transition-colors"
-              />
+              <label className="block text-sm font-medium text-gray-300 mb-2">Avatar</label>
+              <div className="flex items-center gap-4">
+                <div className="shrink-0">
+                  {avatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={avatarUrl}
+                      alt="Avatar preview"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-purple-500/50"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-white/10 border-2 border-dashed border-white/20 flex items-center justify-center text-gray-500 text-xl">
+                      {displayName ? displayName.charAt(0).toUpperCase() : "?"}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    {avatarUrl ? "Change Photo" : "Upload Photo"}
+                  </button>
+                  {avatarUrl && (
+                    <button
+                      type="button"
+                      onClick={() => { setAvatarUrl(""); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="ml-2 text-sm text-red-400 hover:text-red-300"
+                    >
+                      Remove
+                    </button>
+                  )}
+                  <p className="text-gray-500 text-xs mt-1">JPEG, PNG, or WebP. Max 500KB.</p>
+                  {avatarError && <p className="text-red-400 text-xs mt-1">{avatarError}</p>}
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Theme</label>
@@ -321,10 +421,10 @@ function AdminPage() {
             </div>
             <div className="border-t border-white/10 pt-6 mt-6">
               <p className="text-gray-400 text-sm">
-                Your page: <a href={`/p/${profile.slug}`} className="text-purple-400 hover:text-purple-300" target="_blank">onelink.wagnerway.co.za/p/{profile.slug}</a>
+                Your page: <a href={`/p/${profile.slug}`} className="text-purple-400 hover:text-purple-300" target="_blank">linkist.vip/p/{profile.slug}</a>
               </p>
               <p className="text-gray-400 text-sm mt-1">
-                Login code: <span className="text-white font-mono">{profile.loginCode}</span>
+                Username: <span className="text-white font-medium">{profile.slug}</span>
               </p>
             </div>
           </div>
@@ -367,7 +467,7 @@ function AdminPage() {
                 Add Link
               </button>
               {!isPro && links.length >= 5 && (
-                <p className="text-yellow-400 text-xs mt-2">Free plan is limited to 5 links. <a href={STRIPE_PAYMENT_LINK} className="underline" target="_blank">Upgrade to Pro</a> for unlimited.</p>
+                <p className="text-yellow-400 text-xs mt-2">Free plan is limited to 5 links. <button onClick={async () => { const res = await fetch("/api/stripe/checkout", { method: "POST" }); const data = await res.json(); if (data.url) window.location.href = data.url; }} className="underline">Upgrade to Pro</button> for unlimited.</p>
               )}
             </div>
 

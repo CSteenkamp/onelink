@@ -6,21 +6,30 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const { loginCode, password } = await req.json();
-    if (!loginCode || !password) {
+    const body = await req.json();
+    const { slug, loginCode, password } = body;
+
+    if ((!slug && !loginCode) || !password) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
     }
 
-    const profile = await prisma.profile.findUnique({
-      where: { loginCode: loginCode.trim().toUpperCase() },
-    });
+    let profile;
+    if (slug) {
+      profile = await prisma.profile.findUnique({
+        where: { slug: slug.trim().toLowerCase() },
+      });
+    } else {
+      profile = await prisma.profile.findUnique({
+        where: { loginCode: loginCode.trim().toUpperCase() },
+      });
+    }
 
     const valid = profile
       ? await verifyPassword(password, profile.adminPassword)
       : await verifyPassword(password, "$2a$12$invalidhashpaddingtopreventshortexit");
 
     if (!profile || !valid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
     }
 
     const sessionToken = createSessionToken(profile.id);

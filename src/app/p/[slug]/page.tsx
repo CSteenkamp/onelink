@@ -12,12 +12,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const profile = await prisma.profile.findUnique({ where: { slug: params.slug } });
   if (!profile) return { title: "Not Found" };
   return {
-    title: `${profile.displayName} — OneLink`,
-    description: profile.bio || `${profile.displayName}'s OneLink page`,
+    title: `${profile.displayName} — Linkist`,
+    description: profile.bio || `${profile.displayName}'s Linkist page`,
     openGraph: {
-      title: `${profile.displayName} — OneLink`,
-      description: profile.bio || `${profile.displayName}'s OneLink page`,
-      url: `https://onelink.wagnerway.co.za/p/${profile.slug}`,
+      title: `${profile.displayName} — Linkist`,
+      description: profile.bio || `${profile.displayName}'s Linkist page`,
+      url: `https://linkist.vip/p/${profile.slug}`,
       type: "profile",
     },
   };
@@ -74,7 +74,7 @@ export default async function ProfilePage({ params }: Props) {
             "@type": "Person",
             name: profile.displayName,
             description: profile.bio,
-            url: `https://onelink.wagnerway.co.za/p/${profile.slug}`,
+            url: `https://linkist.vip/p/${profile.slug}`,
           }),
         }}
       />

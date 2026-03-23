@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "OneLink — Your Internet, One Link",
+  title: "Linkist — Your Internet, One Link",
   description:
     "Create your personal landing page in 60 seconds. All your links, socials, and content — one beautiful page. Free forever, $10 to unlock everything.",
   keywords: [
@@ -25,23 +25,23 @@ export const metadata: Metadata = {
     "onelink",
   ],
   openGraph: {
-    title: "OneLink — Your Internet, One Link",
+    title: "Linkist — Your Internet, One Link",
     description:
       "Create your personal landing page in 60 seconds. All your links, socials, and content — one beautiful page.",
-    url: "https://onelink.wagnerway.co.za",
-    siteName: "OneLink",
+    url: "https://linkist.vip",
+    siteName: "Linkist",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OneLink — Your Internet, One Link",
+    title: "Linkist — Your Internet, One Link",
     description:
       "Create your personal landing page in 60 seconds. Free forever, $10 to unlock everything.",
   },
   alternates: {
-    canonical: "https://onelink.wagnerway.co.za",
+    canonical: "https://linkist.vip",
   },
-  metadataBase: new URL("https://onelink.wagnerway.co.za"),
+  metadataBase: new URL("https://linkist.vip"),
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>",
   },

@@ -32,6 +32,8 @@ interface ThemeStyle {
   text: string;
   subtext: string;
   hover: string;
+  socialBg?: string;
+  light?: boolean;
 }
 
 interface SocialPlatform {
@@ -107,19 +109,20 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
             {socialLinks.map((social) => {
               const platform = getSocialPlatform(social.platform);
               if (!platform) return null;
+              const defaultBg = theme.socialBg || "rgba(255,255,255,0.1)";
               return (
                 <a
                   key={social.id}
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg transition-all duration-200 hover:scale-110"
-                  style={{ "--hover-color": platform.color } as React.CSSProperties}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-200 hover:scale-110"
+                  style={{ backgroundColor: defaultBg }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.backgroundColor = platform.color;
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.1)";
+                    (e.currentTarget as HTMLElement).style.backgroundColor = defaultBg;
                   }}
                   title={platform.name}
                 >
@@ -154,7 +157,7 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
               href="/"
               className="text-gray-500 hover:text-gray-400 text-xs transition-colors"
             >
-              Powered by 🔗 OneLink
+              Powered by 🔗 Linkist
             </Link>
           </div>
         )}
