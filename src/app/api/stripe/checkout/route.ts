@@ -27,12 +27,13 @@ export async function POST(req: NextRequest) {
     const origin = req.headers.get("origin") || "https://linkist.vip";
 
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+      mode: "subscription" as const,
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       metadata: { profileId },
+      subscription_data: { metadata: { profileId } },
       success_url: `${origin}/admin?upgraded=true`,
       cancel_url: `${origin}/admin?cancelled=true`,
-    });
+    } as Parameters<typeof stripe.checkout.sessions.create>[0]);
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
