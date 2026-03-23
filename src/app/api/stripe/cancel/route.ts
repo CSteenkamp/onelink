@@ -30,11 +30,16 @@ export async function POST(req: NextRequest) {
       cancel_at_period_end: true,
     });
 
-    const endDate = new Date((updated as unknown as { current_period_end: number }).current_period_end * 1000).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    let endDate = "the end of your billing period";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const periodEnd = (updated as any).current_period_end;
+    if (periodEnd && typeof periodEnd === "number") {
+      endDate = new Date(periodEnd * 1000).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
 
     return NextResponse.json({ success: true, endDate });
   } catch (err) {
