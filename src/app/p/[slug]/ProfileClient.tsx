@@ -76,7 +76,7 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={profile.headerImage}
-              alt="Header"
+              alt={`${profile.displayName}'s header image`}
               className="w-full h-full object-cover"
             />
           </div>

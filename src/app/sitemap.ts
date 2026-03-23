@@ -1,6 +1,19 @@
-import { MetadataRoute } from "next";
+import { prisma } from "@/lib/prisma";
+import type { MetadataRoute } from "next";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const profiles = await prisma.profile.findMany({
+    select: { slug: true, updatedAt: true },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  const profileUrls: MetadataRoute.Sitemap = profiles.map((profile) => ({
+    url: `https://linkist.vip/p/${profile.slug}`,
+    lastModified: profile.updatedAt,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
   return [
     {
       url: "https://linkist.vip",
@@ -32,5 +45,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    ...profileUrls,
   ];
 }

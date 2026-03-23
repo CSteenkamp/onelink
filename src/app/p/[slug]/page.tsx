@@ -11,14 +11,25 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const profile = await prisma.profile.findUnique({ where: { slug: params.slug } });
   if (!profile) return { title: "Not Found" };
+  const description = profile.bio || `${profile.displayName}'s Linkist page`;
   return {
     title: `${profile.displayName} — Linkist`,
-    description: profile.bio || `${profile.displayName}'s Linkist page`,
+    description,
     openGraph: {
       title: `${profile.displayName} — Linkist`,
-      description: profile.bio || `${profile.displayName}'s Linkist page`,
+      description,
       url: `https://linkist.vip/p/${profile.slug}`,
       type: "profile",
+      ...(profile.avatarUrl && { images: [{ url: profile.avatarUrl, width: 200, height: 200 }] }),
+    },
+    twitter: {
+      card: profile.headerImage ? "summary_large_image" : "summary",
+      title: `${profile.displayName} — Linkist`,
+      description,
+      ...(profile.headerImage ? { images: [profile.headerImage] } : profile.avatarUrl ? { images: [profile.avatarUrl] } : {}),
+    },
+    alternates: {
+      canonical: `https://linkist.vip/p/${profile.slug}`,
     },
   };
 }
@@ -76,6 +87,23 @@ export default async function ProfilePage({ params }: Props) {
             name: profile.displayName,
             description: profile.bio,
             url: `https://linkist.vip/p/${profile.slug}`,
+            ...(profile.avatarUrl && { image: profile.avatarUrl }),
+            ...(profile.socialLinks.length > 0 && {
+              sameAs: profile.socialLinks.map((s) => s.url).filter((u) => u.startsWith("http")),
+            }),
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Linkist", item: "https://linkist.vip" },
+              { "@type": "ListItem", position: 2, name: profile.displayName, item: `https://linkist.vip/p/${profile.slug}` },
+            ],
           }),
         }}
       />

@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Create Your Free Bio Link Page",
@@ -12,10 +12,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CreateLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function CreateLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }
