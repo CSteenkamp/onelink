@@ -163,7 +163,11 @@ function AdminPage() {
             >
               Preview ↗
             </a>
-            {!isPro && (
+            {isPro ? (
+              <span className="text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1.5 rounded-lg font-semibold shadow-lg shadow-amber-500/20 flex items-center gap-1.5">
+                <span className="text-xs">&#9733;</span> PRO
+              </span>
+            ) : (
               <button
                 onClick={async () => {
                   try {
