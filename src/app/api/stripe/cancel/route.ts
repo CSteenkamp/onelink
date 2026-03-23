@@ -26,11 +26,17 @@ export async function POST(req: NextRequest) {
     const stripe = new Stripe(secretKey);
 
     // Cancel at period end so user keeps Pro until the billing cycle ends
-    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    const updated = await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
 
-    return NextResponse.json({ success: true });
+    const endDate = new Date((updated as unknown as { current_period_end: number }).current_period_end * 1000).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    return NextResponse.json({ success: true, endDate });
   } catch (err) {
     console.error("Stripe cancel error:", err);
     return NextResponse.json({ error: "Failed to cancel subscription" }, { status: 500 });

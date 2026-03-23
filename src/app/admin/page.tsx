@@ -385,7 +385,8 @@ function AdminPage() {
                           try {
                             const res = await authFetch("/api/stripe/cancel", { method: "POST" });
                             if (res.ok) {
-                              setCancelMsg("Subscription cancelled. You'll keep Pro until the end of your billing period.");
+                              const data = await res.json();
+                              setCancelMsg(`Subscription cancelled. You'll keep Pro features until ${data.endDate || "the end of your billing period"}.`);
                             } else {
                               const data = await res.json();
                               setCancelMsg(data.error || "Failed to cancel.");
