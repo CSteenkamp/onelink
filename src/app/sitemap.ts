@@ -1,18 +1,26 @@
 import { prisma } from "@/lib/prisma";
 import type { MetadataRoute } from "next";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const profiles = await prisma.profile.findMany({
-    select: { slug: true, updatedAt: true },
-    orderBy: { updatedAt: "desc" },
-  });
+// Force dynamic rendering so Prisma isn't called at build time
+export const dynamic = "force-dynamic";
 
-  const profileUrls: MetadataRoute.Sitemap = profiles.map((profile) => ({
-    url: `https://linkist.vip/p/${profile.slug}`,
-    lastModified: profile.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  let profileUrls: MetadataRoute.Sitemap = [];
+  try {
+    const profiles = await prisma.profile.findMany({
+      select: { slug: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    profileUrls = profiles.map((profile) => ({
+      url: `https://linkist.vip/p/${profile.slug}`,
+      lastModified: profile.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+  } catch {
+    // DB unavailable (e.g. build time) — skip profile URLs
+  }
 
   return [
     {
