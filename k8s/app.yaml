@@ -45,6 +45,11 @@ spec:
                 secretKeyRef:
                   name: linkist-secrets
                   key: JWT_SECRET
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: linkist-secrets
+                  key: STRIPE_SECRET_KEY
             - name: STRIPE_WEBHOOK_SECRET
               valueFrom:
                 secretKeyRef:

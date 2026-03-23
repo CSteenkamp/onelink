@@ -61,6 +61,82 @@ export function formatSocialUrl(platformId: string, input: string): string {
   }
 }
 
+/**
+ * Extract a display label from a social URL (e.g., "https://x.com/searchclaw" → "@searchclaw")
+ */
+export function extractSocialLabel(platformId: string, url: string): string {
+  try {
+    switch (platformId) {
+      case "twitter": {
+        const match = url.match(/(?:x\.com|twitter\.com)\/([^/?]+)/);
+        return match ? `@${match[1]}` : url;
+      }
+      case "instagram": {
+        const match = url.match(/instagram\.com\/([^/?]+)/);
+        return match ? `@${match[1]}` : url;
+      }
+      case "tiktok": {
+        const match = url.match(/tiktok\.com\/@?([^/?]+)/);
+        return match ? `@${match[1]}` : url;
+      }
+      case "github": {
+        const match = url.match(/github\.com\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "youtube": {
+        const match = url.match(/youtube\.com\/(?:@|channel\/|c\/)?([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "twitch": {
+        const match = url.match(/twitch\.tv\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "linkedin": {
+        const match = url.match(/linkedin\.com\/in\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "discord": {
+        const match = url.match(/discord\.gg\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "telegram": {
+        const match = url.match(/t\.me\/([^/?]+)/);
+        return match ? `@${match[1]}` : url;
+      }
+      case "whatsapp": {
+        const match = url.match(/wa\.me\/(\d+)/);
+        return match ? `+${match[1]}` : url;
+      }
+      case "snapchat": {
+        const match = url.match(/snapchat\.com\/add\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "email": {
+        return url.replace("mailto:", "");
+      }
+      case "facebook": {
+        const match = url.match(/facebook\.com\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "spotify": {
+        const match = url.match(/open\.spotify\.com\/(?:artist|user)\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "onlyfans": {
+        const match = url.match(/onlyfans\.com\/([^/?]+)/);
+        return match ? match[1] : url;
+      }
+      case "website": {
+        return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+      }
+      default:
+        return url;
+    }
+  } catch {
+    return url;
+  }
+}
+
 export type SocialPlatformId = (typeof SOCIAL_PLATFORMS)[number]["id"];
 
 export const THEMES = {

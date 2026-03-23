@@ -11,4 +11,5 @@ data:
   SMTP_SECURE: "false"
   SMTP_USER: "2flippingeasy@gmail.com"
   SMTP_FROM: "2flippingeasy@gmail.com"
+  STRIPE_PRICE_ID: "CHANGE_ME"
   NEXT_PUBLIC_BASE_URL: "https://linkist.vip"

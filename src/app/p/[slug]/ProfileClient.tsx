@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { extractSocialLabel } from "@/lib/constants";
 
 interface ProfileData {
   id: string;
@@ -118,10 +119,11 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
 
         {/* Social links */}
         {socialLinks.length > 0 && (
-          <div className="flex justify-center gap-3 mb-8 animate-fade-in-delay-1 flex-wrap">
+          <div className="flex flex-col items-center gap-2 mb-8 animate-fade-in-delay-1">
             {socialLinks.map((social) => {
               const platform = getSocialPlatform(social.platform);
               if (!platform) return null;
+              const label = extractSocialLabel(social.platform, social.url);
               const defaultBg = theme.socialBg || "rgba(255,255,255,0.1)";
               return (
                 <a
@@ -129,7 +131,7 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-200 hover:scale-110"
+                  className="flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-200 hover:scale-[1.02]"
                   style={{ backgroundColor: defaultBg }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.backgroundColor = platform.color;
@@ -137,9 +139,9 @@ export default function ProfileClient({ profile, links, socialLinks, theme, soci
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.backgroundColor = defaultBg;
                   }}
-                  title={platform.name}
                 >
-                  {platform.icon}
+                  <span className="text-lg">{platform.icon}</span>
+                  <span className={`text-sm font-medium ${theme.text}`}>{label}</span>
                 </a>
               );
             })}

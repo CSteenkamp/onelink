@@ -1,24 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseSessionToken } from "@/lib/auth";
+import { getProfileIdFromRequest } from "@/lib/session";
 
-const PRICE_ID = process.env.STRIPE_PRICE_ID || "price_1TE8IeBiNvYQF2cP7JL6ihgk";
+const PRICE_ID = process.env.STRIPE_PRICE_ID;
 
 export async function POST(req: NextRequest) {
   try {
     const secretKey = process.env.STRIPE_SECRET_KEY;
-    if (!secretKey) {
+    if (!secretKey || !PRICE_ID) {
+      console.error("Stripe not configured: STRIPE_SECRET_KEY or STRIPE_PRICE_ID missing");
       return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
     }
 
-    // Get profileId from session cookie
-    const sessionToken = req.cookies.get("onelink_session")?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const profileId = parseSessionToken(sessionToken);
+    const profileId = await getProfileIdFromRequest(req);
     if (!profileId) {
-      return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const Stripe = (await import("stripe")).default;
@@ -30,7 +25,10 @@ export async function POST(req: NextRequest) {
       mode: "subscription" as const,
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       metadata: { profileId },
-      subscription_data: { metadata: { profileId } },
+      subscription_data: {
+        trial_period_days: 30,
+        metadata: { profileId },
+      },
       success_url: `${origin}/admin?upgraded=true`,
       cancel_url: `${origin}/admin?cancelled=true`,
     } as Parameters<typeof stripe.checkout.sessions.create>[0]);
