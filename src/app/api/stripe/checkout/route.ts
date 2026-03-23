@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       metadata: { profileId },
       subscription_data: {
+        trial_period_days: 30,
         metadata: { profileId },
       },
       success_url: `${origin}/admin?upgraded=true`,
