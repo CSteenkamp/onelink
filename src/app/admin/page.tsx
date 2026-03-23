@@ -59,6 +59,9 @@ function AdminPage() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelMsg, setCancelMsg] = useState("");
 
   // New social
   const [newSocialPlatform, setNewSocialPlatform] = useState("twitter");
@@ -350,6 +353,63 @@ function AdminPage() {
                 Download My Data
               </a>
             </div>
+
+            {/* Cancel Subscription */}
+            {isPro && (
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-white font-medium mb-2">Subscription</h3>
+                {cancelMsg ? (
+                  <p className="text-amber-400 text-sm">{cancelMsg}</p>
+                ) : !cancelConfirm ? (
+                  <div>
+                    <p className="text-gray-400 text-sm mb-4">
+                      You&apos;re on the Pro plan. You can cancel anytime — you&apos;ll keep Pro features until the end of your billing period.
+                    </p>
+                    <button
+                      onClick={() => setCancelConfirm(true)}
+                      className="text-sm text-gray-400 hover:text-white border border-white/10 px-4 py-2 rounded-lg transition-colors"
+                    >
+                      Cancel Subscription
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-amber-300 text-sm">
+                      Are you sure? You&apos;ll keep Pro features until the end of your current billing period.
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        disabled={cancelling}
+                        onClick={async () => {
+                          setCancelling(true);
+                          try {
+                            const res = await authFetch("/api/stripe/cancel", { method: "POST" });
+                            if (res.ok) {
+                              setCancelMsg("Subscription cancelled. You'll keep Pro until the end of your billing period.");
+                            } else {
+                              const data = await res.json();
+                              setCancelMsg(data.error || "Failed to cancel.");
+                            }
+                          } catch {
+                            setCancelMsg("Network error.");
+                          }
+                          setCancelling(false);
+                        }}
+                        className="text-sm bg-amber-600/20 text-amber-400 border border-amber-500/30 px-4 py-2 rounded-lg font-medium hover:bg-amber-600/30 transition-colors disabled:opacity-50"
+                      >
+                        {cancelling ? "Cancelling..." : "Yes, Cancel"}
+                      </button>
+                      <button
+                        onClick={() => setCancelConfirm(false)}
+                        className="text-gray-400 hover:text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                      >
+                        Keep Pro
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Delete Account */}
             <div className="bg-red-500/5 rounded-xl p-6 border border-red-500/20">
