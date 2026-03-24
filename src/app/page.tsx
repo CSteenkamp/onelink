@@ -111,40 +111,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Comparison */}
+      {/* Why Linkist */}
       <section className="px-6 py-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-4">
             Why Linkist?
           </h2>
           <p className="text-gray-400 text-center mb-12">
-            Same features, fraction of the cost.
+            Everything you need. Nothing you don&apos;t.
           </p>
-          <div className="overflow-x-auto">
-            <table className="w-full max-w-2xl mx-auto">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left text-gray-400 py-4 px-4 font-medium">Feature</th>
-                  <th className="text-center text-gray-400 py-4 px-4 font-medium">Linktree</th>
-                  <th className="text-center py-4 px-4 font-medium gradient-text">Linkist</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {[
-                  ["Price", "$5/month ($60/yr)", "$1/mo"],
-                  ["Custom themes", "Pro only", "Free ✓"],
-                  ["Analytics", "Pro only", "Pro"],
-                  ["Social icons", "✓", "✓"],
-                  ["Creator-friendly", "Bans creators", "Everyone welcome"],
-                ].map(([feature, linktree, onelink]) => (
-                  <tr key={feature} className="border-b border-white/5">
-                    <td className="text-white py-3 px-4">{feature}</td>
-                    <td className="text-gray-400 py-3 px-4 text-center">{linktree}</td>
-                    <td className="text-green-400 py-3 px-4 text-center font-medium">{onelink}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+            {[
+              { icon: "💸", title: "Ridiculously affordable", desc: "Free to start, $1/mo for Pro. No surprise fees, no annual lock-in." },
+              { icon: "🎨", title: "Beautiful themes", desc: "Free themes included. Unlock premium themes and custom colors with Pro." },
+              { icon: "🤝", title: "Creator-friendly", desc: "No content restrictions. Your page, your rules. Everyone welcome." },
+            ].map((item) => (
+              <div key={item.title} className="text-center">
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="text-white font-bold text-lg mb-2">{item.title}</h3>
+                <p className="text-gray-400 text-sm">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -166,7 +153,7 @@ export default function Home() {
                 $0 <span className="text-sm font-normal text-gray-400">forever</span>
               </div>
               <ul className="space-y-3 text-gray-300 text-sm mb-8">
-                {["5 links", "All themes", "Social icons", "Shareable page", "Custom bio & avatar"].map((f) => (
+                {["2 links", "2 free themes", "Social icons", "Shareable page", "Custom bio & avatar"].map((f) => (
                   <li key={f} className="flex items-center gap-2">
                     <span className="text-green-400">✓</span> {f}
                   </li>
@@ -188,10 +175,11 @@ export default function Home() {
               <div className="text-3xl font-bold text-white mb-1">
                 $1 <span className="text-sm font-normal text-gray-400">per month</span>
               </div>
-              <p className="text-gray-400 text-sm mb-6">That&apos;s 20x cheaper than Linktree Pro</p>
+              <p className="text-gray-400 text-sm mb-6">30-day free trial included</p>
               <ul className="space-y-3 text-gray-300 text-sm mb-8">
                 {[
                   "Unlimited links",
+                  "All premium themes",
                   "Click analytics",
                   "Custom colors",
                   "Priority badge",
@@ -283,15 +271,15 @@ export default function Home() {
                 name: "How much does Linkist cost?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Linkist is free forever with 5 links and all themes. Pro is just $1/month for unlimited links, analytics, and more.",
+                  text: "Linkist is free forever with 2 links and 2 themes. Pro is just $1/month for unlimited links, all themes, analytics, and more.",
                 },
               },
               {
                 "@type": "Question",
-                name: "Is Linkist better than Linktree?",
+                name: "Why choose Linkist?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Linkist offers similar features to Linktree Pro at a fraction of the cost — $1/month vs $5/month. All themes are free.",
+                  text: "Linkist offers premium features at a fraction of the cost of other link-in-bio tools — just $1/month for unlimited links, all themes, analytics, and more.",
                 },
               },
             ],

@@ -16,15 +16,13 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "Linkist — Free Linktree Alternative | One Link For Everything",
+    default: "Linkist — Your Internet, One Link | Free Bio Link Page",
     template: "%s | Linkist",
   },
   description:
     "Create your free bio link page in 60 seconds. All your links, socials, and content — one beautiful page. Free forever, Pro for $1/mo. No signup needed to start.",
   keywords: [
-    "free linktree alternative",
-    "linktree alternative free",
-    "bio link page",
+    "free bio link page",
     "link in bio",
     "link in bio tool",
     "personal landing page",
@@ -37,10 +35,10 @@ export const metadata: Metadata = {
     "social media links",
     "one link for everything",
     "bio link free",
-    "linktree competitor",
+    "bio link alternative",
   ],
   openGraph: {
-    title: "Linkist — Free Linktree Alternative | Your Internet, One Link",
+    title: "Linkist — Your Internet, One Link",
     description:
       "Create your free bio link page in 60 seconds. Beautiful themes, unlimited customization. Free forever — Pro just $1/mo. Used by creators, influencers & businesses.",
     url: "https://linkist.vip",
@@ -50,7 +48,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Linkist — Free Linktree Alternative",
+    title: "Linkist — Your Internet, One Link",
     description:
       "Your links, socials & content — one beautiful page. Free forever, Pro $1/mo. 30-day free trial.",
     creator: "@linkistvip",

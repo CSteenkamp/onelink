@@ -200,7 +200,7 @@ export const THEMES = {
 export type ThemeId = keyof typeof THEMES;
 
 export const PLAN_LIMITS = {
-  free: { maxLinks: 5, analytics: false, customColors: false, emailCapture: false },
+  free: { maxLinks: 2, analytics: false, customColors: false, emailCapture: false },
   pro: { maxLinks: Infinity, analytics: true, customColors: true, emailCapture: true },
 } as const;
 
